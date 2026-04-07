@@ -38,6 +38,50 @@ app.get('/api/debug', (req, res) => {
   });
 });
 
+// Database debug endpoint
+app.get('/api/debug/db', async (req, res) => {
+  if (!process.env.MONGODB_URI) {
+    return res.json({
+      success: false,
+      message: 'MONGODB_URI not set'
+    });
+  }
+  
+  try {
+    const Blog = require('./models/Blog');
+    const allBlogs = await Blog.find({});
+    const publishedBlogs = await Blog.find({ status: 'published' });
+    const scheduledBlogs = await Blog.find({ status: 'scheduled' });
+    const draftBlogs = await Blog.find({ status: 'draft' });
+    
+    res.json({
+      success: true,
+      message: 'Database connected successfully',
+      stats: {
+        total: allBlogs.length,
+        published: publishedBlogs.length,
+        scheduled: scheduledBlogs.length,
+        draft: draftBlogs.length
+      },
+      blogs: allBlogs.map(blog => ({
+        id: blog._id,
+        title: blog.title,
+        slug: blog.slug,
+        status: blog.status,
+        createdAt: blog.createdAt,
+        publishedAt: blog.publishedAt,
+        scheduledFor: blog.scheduledFor
+      }))
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: 'Database error',
+      error: error.message
+    });
+  }
+});
+
 // Database connection and routes
 if (process.env.MONGODB_URI) {
   try {
