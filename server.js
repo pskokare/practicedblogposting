@@ -25,8 +25,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Get all published blogs
-app.get('/api/public/blogs', async (req, res) => {
+// Original blog routes (what frontend expects)
+app.get('/api/blogs', async (req, res) => {
   await mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -47,7 +47,7 @@ app.get('/api/public/blogs', async (req, res) => {
 });
 
 // Get single blog by slug
-app.get('/api/public/blogs/:slug', async (req, res) => {
+app.get('/api/blogs/:slug', async (req, res) => {
   await mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -67,13 +67,45 @@ app.get('/api/public/blogs/:slug', async (req, res) => {
   });
 });
 
-// Fallback endpoints
-app.get('/api/blogs', (req, res) => {
-  res.redirect('/api/public/blogs');
+// Public routes (for compatibility)
+app.get('/api/public/blogs', async (req, res) => {
+  await mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    ssl: true,
+    sslValidate: false
+  });
+  
+  const Blog = require('./models/Blog');
+  const blogs = await Blog.find({ status: 'published' }).sort({ publishedAt: -1 });
+  
+  await mongoose.disconnect();
+  
+  res.json({
+    success: true,
+    data: blogs
+  });
 });
 
-app.get('/api/blogs/:slug', (req, res) => {
-  res.redirect(`/api/public/blogs/${req.params.slug}`);
+app.get('/api/public/blogs/:slug', async (req, res) => {
+  await mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    ssl: true,
+    sslValidate: false
+  });
+  
+  const Blog = require('./models/Blog');
+  const blog = await Blog.findOne({ slug: req.params.slug });
+  
+  await mongoose.disconnect();
+  
+  res.json({
+    success: true,
+    data: blog
+  });
 });
 
 module.exports = app;
