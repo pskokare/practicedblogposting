@@ -1,79 +1,77 @@
 const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 
-// CORS middleware - must be first
-app.use(cors({
-  origin: ['https://pragati-c2a04.web.app', 'https://practicedblogposting.vercel.app', 'http://localhost:3000'],
-  credentials: true
-}));
+// CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 app.use(express.json());
 
-// Health check endpoint (no database required)
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Debug endpoint to check environment variables
+// Debug endpoint
 app.get('/api/debug', (req, res) => {
   res.json({
-    mongodb_uri_set: !!process.env.MONGODB_URI,
-    node_env: process.env.NODE_ENV,
-    cloudinary_set: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
-    all_vars: {
+    message: 'Debug endpoint working',
+    env_vars: {
       MONGODB_URI: process.env.MONGODB_URI ? 'SET' : 'NOT SET',
       NODE_ENV: process.env.NODE_ENV || 'NOT SET',
-      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'SET' : 'NOT SET',
-      JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT SET'
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'SET' : 'NOT SET'
     }
   });
 });
 
-// Database connection and routes (only if environment variables are set)
-if (process.env.MONGODB_URI) {
-  try {
-    const connectDB = require('./config/db');
-    connectDB();
-    
-    // Routes that require database
-    app.use('/api/public', require('./routes/publicRoutes'));
-    app.use('/api/blogs', require('./routes/blogRoutes'));
-    app.use('/api/authors', require('./routes/authorRoutes'));
-  } catch (error) {
-    console.error('Database connection failed:', error.message);
-  }
-} else {
-  console.log('MONGODB_URI not set - database routes disabled');
-  
-  // Mock routes for testing without database
-  app.get('/api/public/blogs', (req, res) => {
-    res.json({
-      success: true,
-      data: [],
-      message: 'Database not configured - no blogs available'
-    });
+// Mock blogs endpoint
+app.get('/api/public/blogs', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        _id: '1',
+        title: 'Test Blog 1',
+        slug: 'test-blog-1',
+        author: 'Test Author',
+        content: '<p>This is a test blog content.</p>',
+        coverImage: 'https://via.placeholder.com/400x250?text=Test+Blog+1',
+        createdAt: new Date().toISOString(),
+        publishedAt: new Date().toISOString(),
+        views: 0,
+        readTime: 2
+      }
+    ],
+    message: 'Mock blogs loaded successfully'
   });
-  
-  app.get('/api/public/blogs/:slug', (req, res) => {
-    res.json({
-      success: false,
-      message: 'Database not configured - blog not found'
-    });
-  });
-}
+});
 
-// Error handling middleware
-app.use((error, req, res, next) => {
-  console.error(error.stack);
-  res.status(500).json({ 
-    message: 'Something went wrong!', 
-    error: error.message 
+// Mock single blog endpoint
+app.get('/api/public/blogs/:slug', (req, res) => {
+  const { slug } = req.params;
+  res.json({
+    success: true,
+    data: {
+      _id: '1',
+      title: 'Test Blog 1',
+      slug: slug,
+      author: 'Test Author',
+      content: '<h1>Test Blog Content</h1><p>This is the full content of the test blog.</p>',
+      coverImage: 'https://via.placeholder.com/800x400?text=Test+Blog+1',
+      createdAt: new Date().toISOString(),
+      publishedAt: new Date().toISOString(),
+      views: 0,
+      readTime: 2
+    }
   });
 });
 
