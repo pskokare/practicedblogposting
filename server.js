@@ -55,8 +55,50 @@ app.get('/api/public/blogs', (req, res) => {
   });
 });
 
+// Fallback endpoint for any cached references to /api/blogs
+app.get('/api/blogs', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        _id: '1',
+        title: 'Test Blog 1',
+        slug: 'test-blog-1',
+        author: 'Test Author',
+        content: '<p>This is a test blog content.</p>',
+        coverImage: 'https://via.placeholder.com/400x250?text=Test+Blog+1',
+        createdAt: new Date().toISOString(),
+        publishedAt: new Date().toISOString(),
+        views: 0,
+        readTime: 2
+      }
+    ],
+    message: 'Mock blogs loaded successfully (fallback endpoint)'
+  });
+});
+
 // Mock single blog endpoint
 app.get('/api/public/blogs/:slug', (req, res) => {
+  const { slug } = req.params;
+  res.json({
+    success: true,
+    data: {
+      _id: '1',
+      title: 'Test Blog 1',
+      slug: slug,
+      author: 'Test Author',
+      content: '<h1>Test Blog Content</h1><p>This is the full content of the test blog.</p>',
+      coverImage: 'https://via.placeholder.com/800x400?text=Test+Blog+1',
+      createdAt: new Date().toISOString(),
+      publishedAt: new Date().toISOString(),
+      views: 0,
+      readTime: 2
+    }
+  });
+});
+
+// Fallback single blog endpoint
+app.get('/api/blogs/:slug', (req, res) => {
   const { slug } = req.params;
   res.json({
     success: true,
