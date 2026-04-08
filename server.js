@@ -28,6 +28,9 @@ app.get('/api/health', (req, res) => {
 // Original blog routes (what frontend expects)
 app.get('/api/blogs', async (req, res) => {
   try {
+    console.log('Attempting to connect to database...');
+    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -37,10 +40,14 @@ app.get('/api/blogs', async (req, res) => {
       sslValidate: false
     });
     
+    console.log('Database connected successfully');
+    
     const Blog = require('./models/Blog');
     const blogs = await Blog.find({ status: 'published' })
       .sort({ publishedAt: -1 })
       .limit(10);
+    
+    console.log('Found blogs:', blogs.length);
     
     await mongoose.disconnect();
     
@@ -49,10 +56,12 @@ app.get('/api/blogs', async (req, res) => {
       data: blogs
     });
   } catch (error) {
+    console.error('Database connection error:', error.message);
+    console.error('Full error:', error);
     res.json({
       success: true,
       data: [],
-      message: 'Database connection failed'
+      message: `Database connection failed: ${error.message}`
     });
   }
 });
@@ -60,6 +69,9 @@ app.get('/api/blogs', async (req, res) => {
 // Add trailing slash version to match Postman
 app.get('/api/blogs/', async (req, res) => {
   try {
+    console.log('Attempting to connect to database...');
+    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -69,10 +81,14 @@ app.get('/api/blogs/', async (req, res) => {
       sslValidate: false
     });
     
+    console.log('Database connected successfully');
+    
     const Blog = require('./models/Blog');
     const blogs = await Blog.find({ status: 'published' })
       .sort({ publishedAt: -1 })
       .limit(10);
+    
+    console.log('Found blogs:', blogs.length);
     
     await mongoose.disconnect();
     
@@ -81,10 +97,12 @@ app.get('/api/blogs/', async (req, res) => {
       data: blogs
     });
   } catch (error) {
+    console.error('Database connection error:', error.message);
+    console.error('Full error:', error);
     res.json({
       success: true,
       data: [],
-      message: 'Database connection failed'
+      message: `Database connection failed: ${error.message}`
     });
   }
 });
