@@ -32,12 +32,8 @@ app.get('/api/blogs', async (req, res) => {
     console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
     
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 3000,
-      socketTimeoutMS: 10000,
-      ssl: true,
-      sslValidate: false
+      socketTimeoutMS: 10000
     });
     
     console.log('Database connected successfully');
@@ -73,12 +69,8 @@ app.get('/api/blogs/', async (req, res) => {
     console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
     
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 3000,
-      socketTimeoutMS: 10000,
-      ssl: true,
-      sslValidate: false
+      socketTimeoutMS: 10000
     });
     
     console.log('Database connected successfully');
@@ -111,12 +103,8 @@ app.get('/api/blogs/', async (req, res) => {
 app.get('/api/blogs/:slug', async (req, res) => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 3000,
-      socketTimeoutMS: 10000,
-      ssl: true,
-      sslValidate: false
+      socketTimeoutMS: 10000
     });
     
     const Blog = require('./models/Blog');
@@ -140,12 +128,8 @@ app.get('/api/blogs/:slug', async (req, res) => {
 app.get('/api/blogs/:slug/', async (req, res) => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 3000,
-      socketTimeoutMS: 10000,
-      ssl: true,
-      sslValidate: false
+      socketTimeoutMS: 10000
     });
     
     const Blog = require('./models/Blog');
