@@ -39,7 +39,6 @@ app.get('/api/blogs', async (req, res) => {
     
     const Blog = require('./models/Blog');
     const blogs = await Blog.find({ status: 'published' })
-      .select('title slug author coverImage excerpt publishedAt readTime views')
       .sort({ publishedAt: -1 })
       .limit(10);
     
@@ -72,7 +71,6 @@ app.get('/api/blogs/', async (req, res) => {
     
     const Blog = require('./models/Blog');
     const blogs = await Blog.find({ status: 'published' })
-      .select('title slug author coverImage excerpt publishedAt readTime views')
       .sort({ publishedAt: -1 })
       .limit(10);
     
