@@ -46,8 +46,50 @@ app.get('/api/blogs', async (req, res) => {
   });
 });
 
+// Add trailing slash version to match Postman
+app.get('/api/blogs/', async (req, res) => {
+  await mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    ssl: true,
+    sslValidate: false
+  });
+  
+  const Blog = require('./models/Blog');
+  const blogs = await Blog.find({ status: 'published' }).sort({ publishedAt: -1 });
+  
+  await mongoose.disconnect();
+  
+  res.json({
+    success: true,
+    data: blogs
+  });
+});
+
 // Get single blog by slug
 app.get('/api/blogs/:slug', async (req, res) => {
+  await mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    ssl: true,
+    sslValidate: false
+  });
+  
+  const Blog = require('./models/Blog');
+  const blog = await Blog.findOne({ slug: req.params.slug });
+  
+  await mongoose.disconnect();
+  
+  res.json({
+    success: true,
+    data: blog
+  });
+});
+
+// Add trailing slash version for single blog
+app.get('/api/blogs/:slug/', async (req, res) => {
   await mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
